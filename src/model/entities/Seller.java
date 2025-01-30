@@ -16,7 +16,7 @@ public class Seller implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Seller(){}
+    public Seller(){}
 
     public Seller(Integer id, String name, String email, Date birthDate, Double baseSalary, Department department) {
         this.id = id;
