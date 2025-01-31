@@ -30,7 +30,6 @@ public class Seller implements Serializable {
     public Integer getId() {
         return id;
     }
-
     public void setId(Integer id) {
         this.id = id;
     }
@@ -38,7 +37,6 @@ public class Seller implements Serializable {
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -46,7 +44,6 @@ public class Seller implements Serializable {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
@@ -54,7 +51,6 @@ public class Seller implements Serializable {
     public Date getBirthDate() {
         return birthDate;
     }
-
     public void setBirthDate(Date birthDate) {
         this.birthDate = birthDate;
     }
@@ -62,7 +58,6 @@ public class Seller implements Serializable {
     public Double getBaseSalary() {
         return baseSalary;
     }
-
     public void setBaseSalary(Double baseSalary) {
         this.baseSalary = baseSalary;
     }
@@ -70,7 +65,6 @@ public class Seller implements Serializable {
     public Department getDepartment() {
         return department;
     }
-
     public void setDepartment(Department department) {
         this.department = department;
     }

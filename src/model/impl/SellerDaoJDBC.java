@@ -6,11 +6,15 @@ import model.dao.SellerDao;
 import model.entities.Department;
 import model.entities.Seller;
 
+import javax.swing.plaf.SliderUI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SellerDaoJDBC implements SellerDao {
 
@@ -68,6 +72,41 @@ public class SellerDaoJDBC implements SellerDao {
             DB.closeStatement(prepSt);
             DB.closeResultSet(resultSet);
         }
+    }
+
+    @Override
+    public List<Seller> findByDepartment(Department department) {
+        PreparedStatement prepSt = null;
+        ResultSet rs = null;
+        List<Seller> sellersList = new ArrayList<>();
+
+        try {
+            prepSt = conn.prepareStatement("SELECT seller.*,department.Name as DepName "
+                    + "FROM seller INNER JOIN department "
+                    + "ON seller.DepartmentId = department.Id "
+                    + "WHERE DepartmentId = ? "
+                    + "ORDER BY Name");
+            prepSt.setInt(1, department.getId());
+            rs = prepSt.executeQuery();
+
+            Map<Integer, Department> deptMap = new HashMap<>();
+            while(rs.next()) {
+                Department rsLineDept = instatiateDepartment(rs); //instancia um departamento da proxima linha do resultSet
+                deptMap.putIfAbsent(rsLineDept.getId(), rsLineDept); //adiciona o departamento instanciado acima ao mapa "deptMap" com o id do departamento como chave. Estruturas Map nao admitem duas chaves iguais, portanto nao haverá dois objetos departamento iguais no mapa
+
+                //todos os sellers do mesmo departamento devem estar relacionados com o mesmo objeto Department. esse objeto department estará armazenado no mapa deptMap.
+                Seller rsLineSeller = instantiateSeller(rs, deptMap.get(rsLineDept.getId()));
+                sellersList.add(rsLineSeller);
+            }
+        }
+        catch(SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(prepSt);
+            DB.closeResultSet(rs);
+        }
+        return sellersList;
     }
 
     @Override
