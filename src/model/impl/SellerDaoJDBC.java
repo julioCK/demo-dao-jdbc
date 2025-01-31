@@ -78,7 +78,6 @@ public class SellerDaoJDBC implements SellerDao {
     public List<Seller> findByDepartment(Department department) {
         PreparedStatement prepSt = null;
         ResultSet rs = null;
-        List<Seller> sellersList = new ArrayList<>();
 
         try {
             prepSt = conn.prepareStatement("SELECT seller.*,department.Name as DepName "
@@ -90,14 +89,21 @@ public class SellerDaoJDBC implements SellerDao {
             rs = prepSt.executeQuery();
 
             Map<Integer, Department> deptMap = new HashMap<>();
-            while(rs.next()) {
-                Department rsLineDept = instatiateDepartment(rs); //instancia um departamento da proxima linha do resultSet
-                deptMap.putIfAbsent(rsLineDept.getId(), rsLineDept); //adiciona o departamento instanciado acima ao mapa "deptMap" com o id do departamento como chave. Estruturas Map nao admitem duas chaves iguais, portanto nao haverá dois objetos departamento iguais no mapa
+            List<Seller> sellersList = new ArrayList<>();
 
-                //todos os sellers do mesmo departamento devem estar relacionados com o mesmo objeto Department. esse objeto department estará armazenado no mapa deptMap.
-                Seller rsLineSeller = instantiateSeller(rs, deptMap.get(rsLineDept.getId()));
-                sellersList.add(rsLineSeller);
+            while(rs.next()) {
+                int rsDeptKey = rs.getInt("DepartmentId");
+
+                if(!deptMap.containsKey(rsDeptKey)) {
+                   Department dept = instatiateDepartment(rs);
+                   deptMap.put(dept.getId(), dept);
+                   sellersList.add(instantiateSeller(rs, dept));
+                }
+                else {
+                    sellersList.add(instantiateSeller(rs, deptMap.get(rsDeptKey)));
+                }
             }
+            return sellersList;
         }
         catch(SQLException e) {
             throw new DbException(e.getMessage());
@@ -106,7 +112,6 @@ public class SellerDaoJDBC implements SellerDao {
             DB.closeStatement(prepSt);
             DB.closeResultSet(rs);
         }
-        return sellersList;
     }
 
     @Override
