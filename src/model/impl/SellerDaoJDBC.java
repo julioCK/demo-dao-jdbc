@@ -50,7 +50,6 @@ public class SellerDaoJDBC implements SellerDao {
             else {
                 throw new DbException("Error inserting lines. No lines were inserted.");
             }
-
         }
         catch(SQLException e) {
             throw new DbException(e.getMessage());
@@ -83,11 +82,36 @@ public class SellerDaoJDBC implements SellerDao {
         catch(SQLException e) {
             throw new DbException(e.getMessage());
         }
+        finally {
+            DB.closeStatement(prepSt) ;
+        }
     }
 
     @Override
     public void deleteById(Integer id) {
+        PreparedStatement prepSt = null;
 
+        try {
+            conn.setAutoCommit(false);
+            prepSt = conn.prepareStatement("DELETE FROM seller WHERE Id = ?");
+            prepSt.setInt(1, id);
+
+            int rowsAffected = prepSt.executeUpdate();
+
+            if(rowsAffected == 0) {
+                throw new IllegalArgumentException();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+
+        }
+        catch (IllegalArgumentException ia) {
+            throw new DbException("Invalid 'Id' argument: no rows were affected.");
+        }
+        finally {
+            DB.closeStatement(prepSt);
+        }
     }
 
     @Override
