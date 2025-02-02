@@ -62,7 +62,27 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public void update(Seller seller) {
+        PreparedStatement prepSt = null;
 
+        try {
+            conn.setAutoCommit(false);
+            prepSt = conn.prepareStatement(
+                        "UPDATE seller "
+                            + "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
+                            + "WHERE Id = ?");
+            prepSt.setString(1, seller.getName());
+            prepSt.setString(2,seller.getEmail());
+            prepSt.setDate(3, new java.sql.Date(seller.getBirthDate().getTime()));
+            prepSt.setDouble(4, seller.getBaseSalary());
+            prepSt.setInt(5, seller.getDepartment().getId());
+            prepSt.setInt(6, seller.getId());
+
+            prepSt.executeUpdate();
+            conn.commit();
+        }
+        catch(SQLException e) {
+            throw new DbException(e.getMessage());
+        }
     }
 
     @Override
