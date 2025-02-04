@@ -52,7 +52,7 @@ public class DepartmentDaoJDBC implements DepartmentDao {
         try {
             conn.setAutoCommit(false);
 
-            prepSt = conn.prepareStatement("UPDATE department Name = ? WHERE Id = ?");
+            prepSt = conn.prepareStatement("UPDATE department SET Name = ? WHERE Id = ?");
             prepSt.setString(1, department.getName());
             prepSt.setInt(2, department.getId());
 
@@ -93,11 +93,43 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 
     @Override
     public Department findById(Integer id) {
-        return null;
+        PreparedStatement prepSt = null;
+        ResultSet rs = null;
+
+        try {
+            conn.setAutoCommit(false);
+
+            prepSt = conn.prepareStatement("SELECT department.* FROM department WHERE Id = ?");
+            prepSt.setInt(1, id);
+
+            rs = prepSt.executeQuery();
+            if(rs.next()) {
+                conn.commit();
+                return instatiateDepartment(rs);
+            }
+            else {
+                conn.rollback();
+                throw new IllegalArgumentException("Invalid Id! No data was found.");
+            }
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(prepSt);
+            DB.closeResultSet(rs);
+        }
     }
 
     @Override
     public List<Department> findAll() {
         return List.of();
+    }
+
+    private Department instatiateDepartment(ResultSet rs) throws SQLException {
+        Department dept = new Department();
+        dept.setId(rs.getInt(1));
+        dept.setName(rs.getString(2));
+        return dept;
     }
 }
